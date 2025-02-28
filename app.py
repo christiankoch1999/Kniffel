@@ -17,25 +17,19 @@ USER = os.getenv("DB_USER")
 PASSWORD = os.getenv("DB_PASSWORD")
 
 
-import psycopg2
-import os
 
 def get_db_connection():
     try:
-        print("🛠 Versuche, eine Verbindung zur Datenbank herzustellen...")
+        print("🛠 Verbinde mit Supabase über den Session Pooler...")
         conn = psycopg2.connect(
-            host=os.getenv("DB_HOST"),
-            port=os.getenv("DB_PORT"),
-            dbname=os.getenv("DB_NAME"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            sslmode="disable"  # IPv6-Probleme umgehen
+            dsn=os.getenv("DB_DSN"),  # Verwendet die komplette DSN-Verbindung
+            sslmode="require"  # Verbindung über SSL erzwingen
         )
-        print("✅ Verbindung zur Datenbank erfolgreich!")
+        print("✅ Verbindung erfolgreich!")
         return conn
     except Exception as e:
-        print(f"❌ Fehler bei der Datenbankverbindung: {e}")  # Log an Render senden
-        return None
+        print(f"❌ Fehler bei der Verbindung: {e}")
+        return None  # Falls Fehler auftreten, gibt die Funktion None zurück
 
 @app.route('/')
 def index():
