@@ -18,18 +18,22 @@ PASSWORD = os.getenv("DB_PASSWORD")
 
 
 
+
+
 def get_db_connection():
     try:
         print("🛠 Verbinde mit Supabase über den Session Pooler...")
         conn = psycopg2.connect(
-            dsn=os.getenv("DB_DSN"),  # Verwendet die komplette DSN-Verbindung
-            sslmode="require"  # Verbindung über SSL erzwingen
+            dsn=os.getenv("DB_DSN"),  # Verbindung mit DSN-URL
+            sslmode="require",
+            client_encoding='utf8'  # 🔥 Fix für 'server didn't return client encoding'
         )
         print("✅ Verbindung erfolgreich!")
         return conn
     except Exception as e:
         print(f"❌ Fehler bei der Verbindung: {e}")
         return None  # Falls Fehler auftreten, gibt die Funktion None zurück
+
 
 @app.route('/')
 def index():
