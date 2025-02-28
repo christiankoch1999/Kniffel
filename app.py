@@ -1,9 +1,13 @@
-# app.py (angepasst für Render)
-from flask import Flask, request, jsonify, render_template
-import psycopg2
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import os
+import psycopg2
 
 app = Flask(__name__)
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 
 # Verbindungsdetails aus Environment Variables lesen
 HOST = os.getenv("DB_HOST", "db.ocxoaevdhhwynzkkauhc.supabase.co")
