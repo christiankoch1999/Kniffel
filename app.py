@@ -10,22 +10,28 @@ def favicon():
 
 
 # Verbindungsdetails aus Environment Variables lesen
-HOST = os.getenv("DB_HOST", "db.ocxoaevdhhwynzkkauhc.supabase.co")
-PORT = os.getenv("DB_PORT", "5432")
-DATABASE = os.getenv("DB_NAME", "postgres")
-USER = os.getenv("DB_USER", "postgres")
-PASSWORD = os.getenv("DB_PASSWORD", "Assc080265!")  # 🔴 Sollte als Environment Variable gesetzt werden!
+HOST = os.getenv("DB_HOST")
+PORT = os.getenv("DB_PORT")
+DATABASE = os.getenv("DB_NAME")
+USER = os.getenv("DB_USER")
+PASSWORD = os.getenv("DB_PASSWORD")
+
 
 # Datenbankverbindung herstellen
 def get_db_connection():
-    conn = psycopg2.connect(
-        host=HOST,
-        port=PORT,
-        dbname=DATABASE,
-        user=USER,
-        password=PASSWORD
-    )
-    return conn
+    try:
+        conn = psycopg2.connect(
+            host=HOST,
+            port=PORT,
+            dbname=DATABASE,
+            user=USER,
+            password=PASSWORD
+        )
+        print("✅ Datenbankverbindung erfolgreich!")
+        return conn
+    except Exception as e:
+        print(f"❌ Fehler bei der Datenbankverbindung: {e}")
+        return None  # Falls die Verbindung fehlschlägt, gibt die Funktion None zurück
 
 @app.route('/')
 def index():
@@ -45,6 +51,9 @@ def save_game():
             return jsonify({"message": "Fehlende Daten", "status": "error"}), 400
 
         conn = get_db_connection()
+        if conn is None:
+            return jsonify({"message": "Fehler: Keine Verbindung zur Datenbank", "status": "error"}), 500
+
         cursor = conn.cursor()
 
         # Tabelle erstellen, falls sie nicht existiert
@@ -67,10 +76,13 @@ def save_game():
         cursor.close()
         conn.close()
 
+        print("✅ Spiel erfolgreich gespeichert!")
         return jsonify({"message": "Spiel erfolgreich gespeichert!", "status": "success"}), 201
 
     except Exception as e:
+        print(f"❌ Fehler beim Speichern: {e}")
         return jsonify({"message": "Fehler beim Speichern des Spiels", "status": "error", "error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=int(os.getenv("PORT", 10000)))  # 🚀 Standard-Port von Render
