@@ -17,21 +17,25 @@ USER = os.getenv("DB_USER")
 PASSWORD = os.getenv("DB_PASSWORD")
 
 
-# Datenbankverbindung herstellen
+import psycopg2
+import os
+
 def get_db_connection():
     try:
+        print("🛠 Versuche, eine Verbindung zur Datenbank herzustellen...")
         conn = psycopg2.connect(
-            host=HOST,
-            port=PORT,
-            dbname=DATABASE,
-            user=USER,
-            password=PASSWORD
+            host=os.getenv("DB_HOST"),
+            port=os.getenv("DB_PORT"),
+            dbname=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            sslmode="disable"  # IPv6-Probleme umgehen
         )
-        print("✅ Datenbankverbindung erfolgreich!")
+        print("✅ Verbindung zur Datenbank erfolgreich!")
         return conn
     except Exception as e:
-        print(f"❌ Fehler bei der Datenbankverbindung: {e}")
-        return None  # Falls die Verbindung fehlschlägt, gibt die Funktion None zurück
+        print(f"❌ Fehler bei der Datenbankverbindung: {e}")  # Log an Render senden
+        return None
 
 @app.route('/')
 def index():
@@ -41,14 +45,7 @@ def index():
 def save_game():
     try:
         data = request.json
-        print(f"Empfangene Daten: {data}")
-
-        punktzahl_nina = data.get('punktzahl_nina')
-        punktzahl_ck = data.get('punktzahl_ck')
-        sieger = data.get('sieger')
-
-        if punktzahl_nina is None or punktzahl_ck is None or sieger is None:
-            return jsonify({"message": "Fehlende Daten", "status": "error"}), 400
+        print(f"📥 Empfangene Daten: {data}")
 
         conn = get_db_connection()
         if conn is None:
@@ -56,7 +53,6 @@ def save_game():
 
         cursor = conn.cursor()
 
-        # Tabelle erstellen, falls sie nicht existiert
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS Games (
                 id SERIAL PRIMARY KEY,
@@ -69,7 +65,7 @@ def save_game():
 
         cursor.execute(
             "INSERT INTO Games (punktzahl_nina, punktzahl_ck, sieger) VALUES (%s, %s, %s)",
-            (punktzahl_nina, punktzahl_ck, sieger)
+            (data.get('punktzahl_nina'), data.get('punktzahl_ck'), data.get('sieger'))
         )
 
         conn.commit()
@@ -80,8 +76,8 @@ def save_game():
         return jsonify({"message": "Spiel erfolgreich gespeichert!", "status": "success"}), 201
 
     except Exception as e:
-        print(f"❌ Fehler beim Speichern: {e}")
-        return jsonify({"message": "Fehler beim Speichern des Spiels", "status": "error", "error": str(e)}), 500
+        print(f"❌ Fehler beim Speichern des Spiels: {e}")
+        return jsonify({"message": "Fehler beim Speichern", "status": "error", "error": str(e)}), 500
 
 
 if __name__ == '__main__':
