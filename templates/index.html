@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kniffel - Spielergebnisse</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .bonus-row, .finalUpperPoints, .finalLowerPoints, .grandTotal {
+      font-weight: bold;
+      background-color: #f2f2f2;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Kniffel - Spielergebnisse</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Kategorie</th>
+        <th>Nina</th>
+        <th>Ck</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Oberer Bereich -->
+      <tr>
+        <td>1er</td>
+        <td class="editable" data-category="1er" data-player="1">0</td>
+        <td class="editable" data-category="1er" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>2er</td>
+        <td class="editable" data-category="2er" data-player="1">0</td>
+        <td class="editable" data-category="2er" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>3er</td>
+        <td class="editable" data-category="3er" data-player="1">0</td>
+        <td class="editable" data-category="3er" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>4er</td>
+        <td class="editable" data-category="4er" data-player="1">0</td>
+        <td class="editable" data-category="4er" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>5er</td>
+        <td class="editable" data-category="5er" data-player="1">0</td>
+        <td class="editable" data-category="5er" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>6er</td>
+        <td class="editable" data-category="6er" data-player="1">0</td>
+        <td class="editable" data-category="6er" data-player="2">0</td>
+      </tr>
+
+      <tr class="bonus-row">
+        <td>Bonus 35 Punkte</td>
+        <td data-category="bonus" data-player="1" id="bonus1">0</td>
+        <td data-category="bonus" data-player="2" id="bonus2">0</td>
+      </tr>
+
+      <!-- Unterer Bereich -->
+      <tr>
+        <td>3er Pasch</td>
+        <td class="editable" data-category="3er Pasch" data-player="1">0</td>
+        <td class="editable" data-category="3er Pasch" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>4er Pasch</td>
+        <td class="editable" data-category="4er Pasch" data-player="1">0</td>
+        <td class="editable" data-category="4er Pasch" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>Full House</td>
+        <td class="editable" data-category="Full House" data-player="1">0</td>
+        <td class="editable" data-category="Full House" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>Kleine Straße</td>
+        <td class="editable" data-category="Kleine Straße" data-player="1">0</td>
+        <td class="editable" data-category="Kleine Straße" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>Große Straße</td>
+        <td class="editable" data-category="Große Straße" data-player="1">0</td>
+        <td class="editable" data-category="Große Straße" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>Kniffel</td>
+        <td class="editable" data-category="Kniffel" data-player="1">0</td>
+        <td class="editable" data-category="Kniffel" data-player="2">0</td>
+      </tr>
+      <tr>
+        <td>Chance</td>
+        <td class="editable" data-category="Chance" data-player="1">0</td>
+        <td class="editable" data-category="Chance" data-player="2">0</td>
+      </tr>
+
+      <!-- Final Summary -->
+      <tr class="finalUpperPoints">
+        <td>Gesamtpunktzahl oben</td>
+        <td id="total1">0</td>
+        <td id="total2">0</td>
+      </tr>
+      <tr class="finalLowerPoints">
+        <td>Gesamtpunktzahl unten</td>
+        <td id="lowerTotal1">0</td>
+        <td id="lowerTotal2">0</td>
+      </tr>
+      <tr class="grandTotal">
+        <td>Gesamtpunktzahl</td>
+        <td id="grandTotal1">0</td>
+        <td id="grandTotal2">0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button onclick="gewinnerBerechnen()">Gewinner berechnen</button>
+<h2 id="winnerMessage"></h2>
+
+
+  <script>
+    // Funktion zum Bearbeiten der Zellen und Berechnen des Werts
+    document.querySelectorAll('.editable').forEach(cell => {
+      cell.addEventListener('click', function() {
+        const category = this.getAttribute('data-category');
+        const player = this.getAttribute('data-player');
+
+        let value = 0;
+
+        // Für den oberen Teil (1er, 2er, etc.)
+        if (category === "1er" || category === "2er" || category === "3er" || category === "4er" || category === "5er" || category === "6er") {
+          value = prompt(`Wie viele ${category} hast du geworfen?`);
+          if (value >= 1 && value <= 5) {
+            value = value * parseInt(category);
+          } else {
+            alert('Bitte gib eine Zahl zwischen 1 und 5 ein.');
+            return;
+          }
+        } 
+        // Für 3er Pasch, 4er Pasch, Chance (Summe der Augen)
+        else if (category === "3er Pasch" || category === "4er Pasch" || category === "Chance") {
+          value = prompt(`Gib die Summe der geworfenen Augen für ${category} ein:`);
+          value = parseInt(value);
+        }
+        // Für Full House, Kleine Straße, Große Straße, Kniffel (Ja/Nein)
+        else if (category === "Full House" || category === "Kleine Straße" || category === "Große Straße" || category === "Kniffel") {
+          const result = confirm(`Hast du ein ${category}? (OK für Ja, Abbrechen für Nein)`);
+          value = result ? (category === "Full House" ? 25 : category === "Kleine Straße" ? 30 : category === "Große Straße" ? 40 : 50) : 0;
+        }
+
+        // Berechne den Wert und setze ihn in die Zelle
+        this.textContent = value;
+
+        // Gesamtpunktzahl für beide Spieler aktualisieren
+        updateTotalPoints();
+      });
+    });
+
+    // Funktion zum Berechnen und Aktualisieren der Gesamtpunktzahl
+    function updateTotalPoints() {
+      let total1 = 0;
+      let total2 = 0;
+      let lowerTotal1 = 0;
+      let lowerTotal2 = 0;
+
+      // Berechne die Gesamtpunktzahl oben (nur 1er bis 6er und Bonus)
+      document.querySelectorAll('.editable').forEach(cell => {
+        const player = cell.getAttribute('data-player');
+        const score = parseInt(cell.textContent) || 0;
+
+        if (player === "1") {
+          if (cell.getAttribute('data-category') === "1er" || cell.getAttribute('data-category') === "2er" || cell.getAttribute('data-category') === "3er" || cell.getAttribute('data-category') === "4er" || cell.getAttribute('data-category') === "5er" || cell.getAttribute('data-category') === "6er") {
+            total1 += score;
+          }
+          if (cell.getAttribute('data-category') === "3er Pasch" || cell.getAttribute('data-category') === "4er Pasch" || cell.getAttribute('data-category') === "Chance" || cell.getAttribute('data-category') === "Full House" || cell.getAttribute('data-category') === "Kleine Straße" || cell.getAttribute('data-category') === "Große Straße" || cell.getAttribute('data-category') === "Kniffel") {
+            lowerTotal1 += score;
+          }
+        } else if (player === "2") {
+          if (cell.getAttribute('data-category') === "1er" || cell.getAttribute('data-category') === "2er" || cell.getAttribute('data-category') === "3er" || cell.getAttribute('data-category') === "4er" || cell.getAttribute('data-category') === "5er" || cell.getAttribute('data-category') === "6er") {
+            total2 += score;
+          }
+          if (cell.getAttribute('data-category') === "3er Pasch" || cell.getAttribute('data-category') === "4er Pasch" || cell.getAttribute('data-category') === "Chance" || cell.getAttribute('data-category') === "Full House" || cell.getAttribute('data-category') === "Kleine Straße" || cell.getAttribute('data-category') === "Große Straße" || cell.getAttribute('data-category') === "Kniffel") {
+            lowerTotal2 += score;
+          }
+        }
+      });
+
+      // Berechne den Bonus (35 Punkte, wenn Gesamtpunktzahl oben >= 63)
+      const bonus1 = total1 >= 63 ? 35 : 0;
+      const bonus2 = total2 >= 63 ? 35 : 0;
+
+      // Bonus in der Zelle anzeigen
+      document.getElementById('bonus1').textContent = bonus1;
+      document.getElementById('bonus2').textContent = bonus2;
+
+      // Bonus zu den Gesamtpunktzahlen oben hinzufügen
+      total1 += bonus1;
+      total2 += bonus2;
+
+      // Update der Gesamtpunktzahlen oben
+      document.getElementById('total1').textContent = total1;
+      document.getElementById('total2').textContent = total2;
+
+      // Update der Gesamtpunktzahlen unten
+      document.getElementById('lowerTotal1').textContent = lowerTotal1;
+      document.getElementById('lowerTotal2').textContent = lowerTotal2;
+
+      // Gesamtpunktzahl berechnen und anzeigen
+      const grandTotal1 = total1 + lowerTotal1;
+      const grandTotal2 = total2 + lowerTotal2;
+      document.getElementById('grandTotal1').textContent = grandTotal1;
+      document.getElementById('grandTotal2').textContent = grandTotal2;
+    }
+
+
+
+    function gewinnerBerechnen() {
+    const punktzahlNina = document.getElementById("grandTotal1").textContent;  // Verwende .textContent statt .value
+    const punktzahlCk = document.getElementById("grandTotal2").textContent;    // Verwende .textContent statt .value
+
+    // Um sicherzustellen, dass die Werte als Zahlen behandelt werden
+    const total1 = parseInt(punktzahlNina) || 0;  // Falls der Wert leer ist, auf 0 setzen
+    const total2 = parseInt(punktzahlCk) || 0;    // Falls der Wert leer ist, auf 0 setzen
+
+    let winner = "";
+    if (total1 > total2) {
+        winner = "Nina";
+        document.getElementById("winnerMessage").textContent = winner + " hat gewonnen!";
+    } else if (total1 < total2) {
+        winner = "Ck";
+        document.getElementById("winnerMessage").textContent = winner + " hat gewonnen!";
+    } else {
+        winner = "Unentschieden";
+        document.getElementById("winnerMessage").textContent = "Niemand hat gewonnen :(";
+    }
+
+    // Überprüfe, ob die Daten korrekt sind
+    console.log({
+        punktzahl_nina: total1,
+        punktzahl_ck: total2,
+        sieger: winner
+    });
+
+    // Sende die Daten an das Backend
+    fetch('/save_game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',  // Sicherstellen, dass der Content-Type korrekt ist
+        },
+        body: JSON.stringify({
+            punktzahl_nina: total1,
+            punktzahl_ck: total2,
+            sieger: winner
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.message);  // Erfolgsnachricht aus dem Backend
+    })
+    .catch(error => {
+        console.error('Fehler beim Speichern des Spiels:', error);
+        alert('Es gab ein Problem beim Speichern des Spiels.');
+    });
+}
+
+
+
+
+  
+  
+  </script>
+
+</body>
+</html>
