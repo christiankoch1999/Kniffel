@@ -8,37 +8,44 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background-color: #f4f4f4;
+      background-color: #aaa;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
+      
     }
     th, td {
       padding: 10px;
       text-align: center;
-      border: 1px solid #ddd;
+      border: 2px solid black;
     }
     th {
-      background-color: #4CAF50;
+      background-color: #007BFF;
       color: white;
     }
     button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
+      background-color: #007BFF;
+      color: black;
+      border: 1px black;
       padding: 10px;
       margin-top: 10px;
       cursor: pointer;
     }
     button:hover {
-      background-color: #45a049;
+      background-color: #007BFF;
     }
     .bonus-row, .finalUpperPoints, .finalLowerPoints, .grandTotal {
       font-weight: bold;
-      background-color: #f2f2f2;
+      background-color: #aaa;
     }
+    .small-text {
+    font-size: 14px; /* Kleinere Schrift */
+    font-weight: normal; /* Kein Fettdruck */
+    color: black; /* Optional: Grauer Farbton */
+}
+
 
   </style>
 </head>
@@ -86,11 +93,17 @@
         <td class="editable" data-category="6er" data-player="1">0</td>
         <td class="editable" data-category="6er" data-player="2">0</td>
       </tr>
+    
 
       <tr class="bonus-row">
         <td>Bonus 35 Punkte</td>
         <td data-category="bonus" data-player="1" id="bonus1">0</td>
         <td data-category="bonus" data-player="2" id="bonus2">0</td>
+      </tr>
+      <tr class="finalUpperPoints">
+        <td>Gesamtpunktzahl oben</td>
+        <td id="total1">0</td>
+        <td id="total2">0</td>
       </tr>
 
       <!-- Unterer Bereich -->
@@ -131,11 +144,7 @@
       </tr>
 
       <!-- Final Summary -->
-      <tr class="finalUpperPoints">
-        <td>Gesamtpunktzahl oben</td>
-        <td id="total1">0</td>
-        <td id="total2">0</td>
-      </tr>
+    
       <tr class="finalLowerPoints">
         <td>Gesamtpunktzahl unten</td>
         <td id="lowerTotal1">0</td>
@@ -151,6 +160,13 @@
 
   <button onclick="gewinnerBerechnen()">Gewinner berechnen</button>
 <h2 id="winnerMessage"></h2>
+<br></br>
+<br></br>
+<br></br>
+<br></br>
+<h2>Statistiken</h2>
+<button onclick="ladeStats()">Punktestand abrufen</button>
+<p id="statsOutput"></p>
 
 
   <script>
@@ -260,10 +276,13 @@
     let winner = "";
     if (total1 > total2) {
         winner = "Nina";
-        document.getElementById("winnerMessage").textContent = winner + " hat gewonnen!";
+        document.getElementById("winnerMessage").innerHTML = 
+    winner + " hat gewonnen!<br><span class='small-text'>Schade Christian, weiter machen!</span>";
+
+
     } else if (total1 < total2) {
         winner = "Ck";
-        document.getElementById("winnerMessage").textContent = winner + " hat gewonnen!";
+        document.getElementById("winnerMessage").innerHTML = winner + " hat gewonnen!<br><span class='small-text'>Cmon!</span>";
     } else {
         winner = "Unentschieden";
         document.getElementById("winnerMessage").textContent = "Niemand hat gewonnen :(";
@@ -299,9 +318,20 @@
 }
 
 
-
-
-  
+function ladeStats() {
+        fetch('/stats')  // Flask-Route aufrufen
+            .then(response => response.json())  // Antwort als JSON umwandeln
+            .then(data => {
+                // Daten in HTML anzeigen
+                document.getElementById("statsOutput").innerHTML = 
+                    `<strong>Nina:</strong> ${data.siege_nina} Siege<br>
+                     <strong>Ck:</strong> ${data.siege_ck} Siege`;
+            })
+            .catch(error => {
+                console.error("Fehler beim Abrufen der Daten:", error);
+                document.getElementById("statsOutput").innerHTML = "⚠️ Fehler beim Abrufen der Statistiken!";
+            });
+    }
   
   </script>
 

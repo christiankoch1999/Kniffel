@@ -73,6 +73,39 @@ def save_game():
         print(f"❌ Fehler beim Speichern des Spiels: {e}")
         return jsonify({"message": "Fehler beim Speichern", "status": "error", "error": str(e)}), 500
 
+@app.route('/stats', methods=["GET"])
+def stats():
+    try:
+        conn = get_db_connection()
+
+        if conn is None:
+            return jsonify({"message": "Fehler: Keine Verbindung zur Datenbank", "status": "error"}), 500
+
+        cursor = conn.cursor()
+
+        # Siege von Nina abrufen
+        cursor.execute("SELECT COUNT(*) FROM Games WHERE sieger = 'Nina';")
+        siege_nina = cursor.fetchone()[0]  # Nur die Zahl extrahieren
+
+        # Siege von Ck abrufen
+        cursor.execute("SELECT COUNT(*) FROM Games WHERE sieger = 'Ck';")
+        siege_ck = cursor.fetchone()[0]
+
+        cursor.close()
+        conn.close()
+
+        # Ergebnisse zurückgeben
+        return jsonify({
+            "siege_nina": siege_nina,
+            "siege_ck": siege_ck,
+            "status": "success"
+        }), 200
+
+    except Exception as e:
+        print(f"❌ Fehler in /stats: {e}")
+        return jsonify({"message": "Fehler beim Abrufen der Statistiken", "status": "error"}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=int(os.getenv("PORT", 10000)))  # 🚀 Standard-Port von Render
