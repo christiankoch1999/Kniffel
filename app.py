@@ -9,25 +9,21 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
-# Verbindungsdetails aus Environment Variables lesen
-HOST = os.getenv("DB_HOST")
-PORT = os.getenv("DB_PORT")
-DATABASE = os.getenv("DB_NAME")
-USER = os.getenv("DB_USER")
-PASSWORD = os.getenv("DB_PASSWORD")
-
-
-
 
 
 def get_db_connection():
     try:
         print("🛠 Verbinde mit Supabase über den Session Pooler...")
         conn = psycopg2.connect(
-            dsn=os.getenv("DB_DSN"),  # Verbindung mit DSN-URL
-            sslmode="require",
-            client_encoding='utf8'  # 🔥 Fix für 'server didn't return client encoding'
-        )
+    dbname="postgres",
+    user="postgres.ocxoaevdhhwynzkkauhc",
+    password="Assc080265!",
+    host="aws-0-eu-central-1.pooler.supabase.com",
+    port="6543",
+    sslmode="require"
+)
+
+        
         print("✅ Verbindung erfolgreich!")
         return conn
     except Exception as e:
